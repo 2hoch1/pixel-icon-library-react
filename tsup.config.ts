@@ -22,7 +22,39 @@ export default defineConfig({
   preserveModules: true,
   // Bundle upstream icons so consumers don't need loaders for .svg/.tsx in node_modules
   noExternal: ['@hackernoon/pixel-icon-library'],
-  esbuildPlugins: [svgrPlugin() as any],
+  esbuildPlugins: [
+    svgrPlugin({
+      exportType: 'default',
+      plugins: [
+        {
+          name: 'replace-fill-and-stroke-with-currentcolor',
+          fn: () => ({
+            element: {
+              enter(node) {
+                // Replace fill and stroke with currentColor, but preserve "none" and "inherit"
+                if (node.attributes) {
+                  if (node.attributes.fill) {
+                    const fill = node.attributes.fill;
+                    // Only replace if it's a color (not "none" or "inherit")
+                    if (fill && fill !== 'none' && fill !== 'inherit') {
+                      node.attributes.fill = 'currentColor';
+                    }
+                  }
+                  if (node.attributes.stroke) {
+                    const stroke = node.attributes.stroke;
+                    // Only replace if it's a color (not "none" or "inherit")
+                    if (stroke && stroke !== 'none' && stroke !== 'inherit') {
+                      node.attributes.stroke = 'currentColor';
+                    }
+                  }
+                }
+              },
+            },
+          }),
+        },
+      ],
+    }) as any,
+  ],
   target: 'es2020',
   outDir: 'dist',
   outExtension({ format }) {
