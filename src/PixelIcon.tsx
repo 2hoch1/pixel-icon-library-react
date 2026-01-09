@@ -1,20 +1,16 @@
-import type { ComponentType, SVGProps } from 'react';
-import {
-  iconRegistry,
-  type IconName,
-  type IconRegistry,
-  type IconVariant,
-  type RegularIconName,
-  type SolidIconName,
-} from './generated/icons';
+import { useEffect, useMemo, useState } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
+import dynamicIconImports from './dynamicIconImports';
+import type { IconName, IconVariant } from './icon-types';
 
-export type { IconName, IconRegistry, IconVariant, RegularIconName, SolidIconName } from './generated/icons';
+export type { IconName, IconVariant } from './icon-types';
 
 export type PixelIconProps = SVGProps<SVGSVGElement> & {
   name: IconName;
   variant?: IconVariant;
   size?: number | string;
   title?: string;
+  fallback?: ReactNode;
 };
 
 const defaultSize = 24;
@@ -24,20 +20,73 @@ export function PixelIcon({
   variant,
   size = defaultSize,
   title,
+  fallback = null,
   ...rest
 }: PixelIconProps) {
-  const chosenVariant: IconVariant = variant ?? (name.endsWith('-solid') ? 'solid' : 'regular');
-  const registry = iconRegistry[chosenVariant];
-  const IconComponent = registry[name as keyof typeof registry] as
-    | ComponentType<SVGProps<SVGSVGElement> & { title?: string }>
-    | undefined;
+  const [IconComponent, setIconComponent] = useState<
+    ComponentType<SVGProps<SVGSVGElement> & { title?: string }>
+  >();
 
-  if (!IconComponent) {
-    console.warn(`[pixel-icon-library-react] Unknown icon: ${name} (${chosenVariant}).`);
-    return null;
-  }
+  const resolvedName = useMemo<IconName | undefined>(() => {
+    const hasBrandsSuffix = name.endsWith('-brands');
+    const hasPurcatsSuffix = name.endsWith('-purcats');
+    const hasSolidSuffix = name.endsWith('-solid');
+    
+    let baseName = name
+      .replace(/-brands$/, '')
+      .replace(/-purcats$/, '')
+      .replace(/-solid$/, '');
+    
+    let targetVariant: IconVariant | undefined;
+    
+    if (variant) {
+      targetVariant = variant;
+    } else if (hasBrandsSuffix) {
+      targetVariant = 'brands';
+    } else if (hasPurcatsSuffix) {
+      targetVariant = 'purcats';
+    } else if (hasSolidSuffix) {
+      targetVariant = 'solid';
+    } else {
+      targetVariant = 'regular';
+    }
+    
+    const candidate = (targetVariant === 'regular' 
+      ? baseName 
+      : `${baseName}-${targetVariant}`) as IconName;
+    
+    return dynamicIconImports[candidate] ? candidate : undefined;
+  }, [name, variant]);
 
-  const dimension = typeof size === 'number' ? `${size}px` : size;
+  useEffect(() => {
+    let cancelled = false;
+    if (!resolvedName) {
+      setIconComponent(undefined);
+      return undefined;
+    }
+
+    const importer = dynamicIconImports[resolvedName];
+    importer()
+      .then((mod) => {
+        if (!cancelled) {
+          const Component = mod?.default as ComponentType<
+            SVGProps<SVGSVGElement> & { title?: string }
+          >;
+          setIconComponent(() => Component);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setIconComponent(undefined);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedName]);
+
+  if (!IconComponent) return fallback ?? null;
+
+  const dimension = typeof size === 'number' ? `${size}px` : size ?? `${defaultSize}px`;
 
   return (
     <IconComponent

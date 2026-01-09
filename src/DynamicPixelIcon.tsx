@@ -1,21 +1,18 @@
-import { ComponentType, SVGProps, Suspense, lazy, useMemo } from 'react';
-import type { IconName, IconVariant } from './index';
+import { Suspense, lazy, useMemo } from 'react';
+import type { ReactNode, SVGProps } from 'react';
+import dynamicIconImports from './dynamicIconImports';
+import type { IconName, IconVariant } from './icon-types';
 
 interface DynamicPixelIconProps extends Omit<SVGProps<SVGSVGElement>, 'ref'> {
   name: IconName;
   variant?: IconVariant;
-  size?: number;
-  fallback?: React.ReactNode;
+  size?: number | string;
+  fallback?: ReactNode;
 }
 
 /**
- * DynamicPixelIcon - Lazy-loads icons at runtime for better code-splitting
- * 
- * Usage:
- * ```tsx
- * <DynamicPixelIcon name="heart" size={24} />
- * <DynamicPixelIcon name="star-solid" />
- * ```
+ * DynamicPixelIcon - Lazy-loads icons at runtime for better code-splitting.
+ * Falls back to `fallback` or null if the icon cannot be resolved.
  */
 export const DynamicPixelIcon = ({
   name,
@@ -24,30 +21,49 @@ export const DynamicPixelIcon = ({
   fallback = null,
   ...props
 }: DynamicPixelIconProps) => {
-  const LazyIcon = useMemo(() => {
-    // Determine actual variant to use
-    const actualVariant = variant || (name.endsWith('-solid') ? 'solid' : 'regular');
-    const cleanName = name.replace('-solid', '');
-
-    // Dynamically import the icon based on name
-    try {
-      return lazy(() =>
-        import(`@hackernoon/pixel-icon-library/icons/SVG/${actualVariant}/${cleanName}.svg?react`)
-          .then((module) => ({ default: module.default as ComponentType<SVGProps<SVGSVGElement>> }))
-          .catch(() => {
-            // Fallback if icon not found
-            return { default: () => <svg width={size} height={size} /> };
-          })
-      );
-    } catch {
-      // Return empty SVG if import fails
-      return () => <svg width={size} height={size} />;
+  const dimension = typeof size === 'number' ? `${size}px` : size ?? '24px';
+  const resolvedName = useMemo<IconName | undefined>(() => {
+    const hasBrandsSuffix = name.endsWith('-brands');
+    const hasPurcatsSuffix = name.endsWith('-purcats');
+    const hasSolidSuffix = name.endsWith('-solid');
+    
+    let baseName = name
+      .replace(/-brands$/, '')
+      .replace(/-purcats$/, '')
+      .replace(/-solid$/, '');
+    
+    let targetVariant: IconVariant | undefined;
+    
+    if (variant) {
+      targetVariant = variant;
+    } else if (hasBrandsSuffix) {
+      targetVariant = 'brands';
+    } else if (hasPurcatsSuffix) {
+      targetVariant = 'purcats';
+    } else if (hasSolidSuffix) {
+      targetVariant = 'solid';
+    } else {
+      targetVariant = 'regular';
     }
-  }, [name, variant, size]);
+    
+    const candidate = (targetVariant === 'regular' 
+      ? baseName 
+      : `${baseName}-${targetVariant}`) as IconName;
+    
+    return dynamicIconImports[candidate] ? candidate : undefined;
+  }, [name, variant]);
+
+  const LazyIcon = useMemo(() => {
+    if (!resolvedName) return undefined;
+    const importer = dynamicIconImports[resolvedName];
+    return lazy(importer);
+  }, [resolvedName]);
+
+  if (!LazyIcon) return fallback ?? null;
 
   return (
-    <Suspense fallback={fallback || <svg width={size} height={size} />}>
-      <LazyIcon {...props} width={size} height={size} />
+    <Suspense fallback={fallback}>
+      <LazyIcon {...props} width={dimension} height={dimension} />
     </Suspense>
   );
 };

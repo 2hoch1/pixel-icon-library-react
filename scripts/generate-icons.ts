@@ -3,7 +3,7 @@ import path from 'path';
 
 const dependencyName = '@hackernoon/pixel-icon-library';
 const svgRoot = ['icons', 'SVG'];
-const variants = ['regular', 'solid'] as const;
+const variants = ['brands', 'purcats', 'regular', 'solid'] as const;
 
 const header = `// AUTO-GENERATED FILE. DO NOT EDIT.
 // Run "npm run generate" to regenerate from @hackernoon/pixel-icon-library.
@@ -15,6 +15,13 @@ const toPascalCase = (value: string) =>
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join('');
+
+type IconEntry = {
+  baseName: string;
+  componentName: string;
+  variant: (typeof variants)[number];
+  importPath: string;
+};
 
 async function ensureDependencyDir(): Promise<string> {
   const modulePath = path.join(process.cwd(), 'node_modules', dependencyName);
@@ -40,62 +47,140 @@ async function readIcons(modulePath: string, variant: (typeof variants)[number])
     .sort((a: string, b: string) => a.localeCompare(b));
 }
 
+async function cleanDir(dir: string) {
+  await fs.rm(dir, { recursive: true, force: true });
+  await fs.mkdir(dir, { recursive: true });
+}
+
+function buildIconFileContent(entry: IconEntry) {
+  return [
+    header,
+    '/// <reference path="../types/upstream-svg.d.ts" />',
+    `import SvgComponent from '${entry.importPath}?react';`,
+    '',
+    'export default SvgComponent;',
+    '',
+  ].join('\n');
+}
+
+function buildIconsBarrel(entries: IconEntry[]) {
+  const lines = [header];
+  for (const entry of entries) {
+    lines.push(`export { default as ${entry.componentName} } from './${entry.baseName}';`);
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
+function buildTypesFile(entries: IconEntry[]) {
+  const brandsNames = entries
+    .filter((entry) => entry.variant === 'brands')
+    .map((entry) => entry.baseName);
+  const purcatsNames = entries
+    .filter((entry) => entry.variant === 'purcats')
+    .map((entry) => entry.baseName);
+  const regularNames = entries
+    .filter((entry) => entry.variant === 'regular')
+    .map((entry) => entry.baseName);
+  const solidNames = entries
+    .filter((entry) => entry.variant === 'solid')
+    .map((entry) => entry.baseName);
+
+  const lines: string[] = [
+    header,
+    "import type { ComponentType, SVGProps } from 'react';",
+    '',
+    `export const brandsIconNames = [${brandsNames
+      .map((name) => `'${name}'`)
+      .join(', ')}] as const;`,
+    `export const purcatsIconNames = [${purcatsNames
+      .map((name) => `'${name}'`)
+      .join(', ')}] as const;`,
+    `export const regularIconNames = [${regularNames
+      .map((name) => `'${name}'`)
+      .join(', ')}] as const;`,
+    `export const solidIconNames = [${solidNames
+      .map((name) => `'${name}'`)
+      .join(', ')}] as const;`,
+    'export const iconNames = [...brandsIconNames, ...purcatsIconNames, ...regularIconNames, ...solidIconNames] as const;\n',
+    'export type BrandsIconName = typeof brandsIconNames[number];',
+    'export type PurcatsIconName = typeof purcatsIconNames[number];',
+    'export type RegularIconName = typeof regularIconNames[number];',
+    'export type SolidIconName = typeof solidIconNames[number];',
+    'export type IconName = BrandsIconName | PurcatsIconName | RegularIconName | SolidIconName;',
+    "export type IconVariant = 'brands' | 'purcats' | 'regular' | 'solid';\n",
+    'export type IconModule = Promise<{ default: ComponentType<SVGProps<SVGSVGElement>> }>;\n',
+    'export type DynamicIconImport = () => IconModule;\n',
+    'export type DynamicIconImportMap = Record<IconName, DynamicIconImport>;\n',
+  ];
+
+  return lines.join('\n');
+}
+
+function buildDynamicIconImportsFile(entries: IconEntry[]) {
+  const lines: string[] = [
+    header,
+    '/// <reference path="./types/upstream-svg.d.ts" />',
+    "import type { DynamicIconImportMap, IconModule } from './icon-types';",
+    '',
+    '// @ts-ignore - Dynamic imports are resolved at runtime',
+    'const loadIcon = (path: string): IconModule => import(path);',
+    '',
+    'const dynamicIconImports = {',
+  ];
+
+  entries.forEach((entry) => {
+    lines.push(
+      `  '${entry.baseName}': () => loadIcon('${entry.importPath}?react'),`
+    );
+  });
+
+  lines.push('} as DynamicIconImportMap;');
+  lines.push('');
+  lines.push('export default dynamicIconImports;');
+  lines.push('');
+
+  return lines.join('\n');
+}
+
 async function generate() {
   const modulePath = await ensureDependencyDir();
+  const iconsDir = path.join(process.cwd(), 'src', 'icons');
+  const srcDir = path.join(process.cwd(), 'src');
 
-  const importLines: string[] = [];
-  const registryLines: string[] = [];
-  const exportNames: string[] = [];
-  const regularNames: string[] = [];
-  const solidNames: string[] = [];
+  await cleanDir(iconsDir);
+
+  const entries: IconEntry[] = [];
 
   for (const variant of variants) {
     const files = await readIcons(modulePath, variant);
-    registryLines.push(`export const ${variant}Icons = {`);
 
     for (const file of files) {
       const baseName = file.replace(/\.svg$/i, '');
-      const pascal = toPascalCase(baseName.replace(/-solid$/i, ''));
-      const componentName = `${pascal}${variant === 'solid' ? 'Solid' : 'Regular'}Icon`;
+      const pascal = toPascalCase(baseName);
+      const componentName = `${pascal}Icon`;
       const importPath = `${dependencyName}/icons/SVG/${variant}/${file}`;
 
-      importLines.push(`import ${componentName} from '${importPath}';`);
-      registryLines.push(`  '${baseName}': ${componentName},`);
-      exportNames.push(componentName);
+      const entry: IconEntry = { baseName, componentName, variant, importPath };
+      entries.push(entry);
 
-      if (variant === 'regular') {
-        regularNames.push(baseName);
-      } else {
-        solidNames.push(baseName);
-      }
+      const iconFilePath = path.join(iconsDir, `${baseName}.ts`);
+      const iconContent = buildIconFileContent(entry);
+      await fs.writeFile(iconFilePath, iconContent, 'utf8');
     }
-
-    registryLines.push(
-      `} as const satisfies Record<${variant === 'regular' ? 'RegularIconName' : 'SolidIconName'}, IconComponent>;\n`
-    );
   }
 
-  const content = [
-    header,
-    "import type { ComponentType, SVGProps } from 'react';",
-    ...importLines,
-    '',
-    'type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { title?: string }>;\n',
-    `export type RegularIconName = ${regularNames.map((name) => `'${name}'`).join(' | ')};`,
-    `export type SolidIconName = ${solidNames.map((name) => `'${name}'`).join(' | ')};`,
-    'export type IconName = RegularIconName | SolidIconName;',
-    "export type IconVariant = 'regular' | 'solid';\n",
-    ...registryLines,
-    'export const iconRegistry = { regular: regularIcons, solid: solidIcons } as const;',
-    'export type IconRegistry = typeof iconRegistry;\n',
-    `export { ${exportNames.join(', ')} };`,
-    '',
-  ].join('\n');
+  const barrelContent = buildIconsBarrel(entries);
+  await fs.writeFile(path.join(iconsDir, 'index.ts'), barrelContent, 'utf8');
 
-  const outputPath = path.join(process.cwd(), 'src', 'generated', 'icons.ts');
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
-  await fs.writeFile(outputPath, content, 'utf8');
-  console.log(`Generated ${outputPath}`);
+  const typesContent = buildTypesFile(entries);
+  await fs.writeFile(path.join(srcDir, 'icon-types.ts'), typesContent, 'utf8');
+
+  const dynamicImportsContent = buildDynamicIconImportsFile(entries);
+  await fs.writeFile(path.join(srcDir, 'dynamicIconImports.ts'), dynamicImportsContent, 'utf8');
+
+  console.log(`Generated ${entries.length} icon entrypoints under ${iconsDir}`);
+  console.log('Generated icon-types.ts and dynamicIconImports.ts');
 }
 
 generate().catch((error) => {

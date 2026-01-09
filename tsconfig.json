@@ -13,6 +13,7 @@
     "resolveJsonModule": true,
     "suppressImplicitAnyIndexErrors": false,
     "types": ["react", "node"],
+    "typeRoots": ["./node_modules/@types", "./src"],
     "baseUrl": "./src",
     "paths": {
       "@src/*": ["./*"]

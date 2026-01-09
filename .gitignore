@@ -5,3 +5,9 @@ tsconfig.tsbuildinfo
 .DS_Store
 package-lock.json
 *.tgz
+
+# Auto-generated files by npm run generate
+src/icons/*
+!src/icons/.gitkeep
+src/icon-types.ts
+src/dynamicIconImports.ts
