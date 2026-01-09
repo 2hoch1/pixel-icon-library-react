@@ -91,7 +91,7 @@ You can browse all available icons on the [Pixel Icon Library][pixel-icon-librar
 
 ## License
 
-This project is licensed under the [MIT License][license].
+This project is licensed under the [MIT License][license].  
 For the icon license, please refer to the original [Pixel Icon Library][pixel-icon-library-repo] repository.
 
 [pixel-icon-library]: https://pixeliconlibrary.com/
