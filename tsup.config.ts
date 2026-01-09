@@ -25,40 +25,14 @@ export default defineConfig({
   esbuildPlugins: [
     svgrPlugin({
       exportType: 'default',
+      svgo: true,
       svgoConfig: {
         plugins: [
           {
-            name: 'preset-default',
+            name: 'removeAttrs',
             params: {
-              overrides: {
-                // Don't convert colors - we'll handle this in React
-                convertPathData: false,
-              },
+              attrs: '(id)',
             },
-          },
-          {
-            name: 'convert-colors',
-            fn: () => ({
-              element: {
-                enter(node) {
-                  // Replace fill and stroke with currentColor, but preserve "none" and "inherit"
-                  if (node.attributes) {
-                    if (node.attributes.fill) {
-                      const fill = node.attributes.fill;
-                      if (fill && fill !== 'none' && fill !== 'inherit') {
-                        node.attributes.fill = 'currentColor';
-                      }
-                    }
-                    if (node.attributes.stroke) {
-                      const stroke = node.attributes.stroke;
-                      if (stroke && stroke !== 'none' && stroke !== 'inherit') {
-                        node.attributes.stroke = 'currentColor';
-                      }
-                    }
-                  }
-                },
-              },
-            }),
           },
         ],
       },
