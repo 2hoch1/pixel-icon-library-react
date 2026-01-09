@@ -23,3 +23,11 @@ declare module '@hackernoon/pixel-icon-library/icons/SVG/solid/*.svg' {
   const Component: ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
   export default Component;
 }
+
+declare global {
+  namespace JSX {
+    interface SVGProps<T> {
+      fill?: string | 'currentColor';
+    }
+  }
+}
