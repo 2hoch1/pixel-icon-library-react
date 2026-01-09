@@ -1,6 +1,6 @@
 {
   "name": "@2hoch1/pixel-icon-library-react",
-  "version": "1.1.0-rc.3",
+  "version": "1.1.0-rc.5",
   "description": "React wrapper components for the HackerNoon Pixel Icon Library.",
   "license": "MIT",
   "type": "module",

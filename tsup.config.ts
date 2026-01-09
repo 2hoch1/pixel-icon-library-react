@@ -25,34 +25,43 @@ export default defineConfig({
   esbuildPlugins: [
     svgrPlugin({
       exportType: 'default',
-      plugins: [
-        {
-          name: 'replace-fill-and-stroke-with-currentcolor',
-          fn: () => ({
-            element: {
-              enter(node) {
-                // Replace fill and stroke with currentColor, but preserve "none" and "inherit"
-                if (node.attributes) {
-                  if (node.attributes.fill) {
-                    const fill = node.attributes.fill;
-                    // Only replace if it's a color (not "none" or "inherit")
-                    if (fill && fill !== 'none' && fill !== 'inherit') {
-                      node.attributes.fill = 'currentColor';
-                    }
-                  }
-                  if (node.attributes.stroke) {
-                    const stroke = node.attributes.stroke;
-                    // Only replace if it's a color (not "none" or "inherit")
-                    if (stroke && stroke !== 'none' && stroke !== 'inherit') {
-                      node.attributes.stroke = 'currentColor';
-                    }
-                  }
-                }
+      svgoConfig: {
+        plugins: [
+          {
+            name: 'preset-default',
+            params: {
+              overrides: {
+                // Don't convert colors - we'll handle this in React
+                convertPathData: false,
               },
             },
-          }),
-        },
-      ],
+          },
+          {
+            name: 'convert-colors',
+            fn: () => ({
+              element: {
+                enter(node) {
+                  // Replace fill and stroke with currentColor, but preserve "none" and "inherit"
+                  if (node.attributes) {
+                    if (node.attributes.fill) {
+                      const fill = node.attributes.fill;
+                      if (fill && fill !== 'none' && fill !== 'inherit') {
+                        node.attributes.fill = 'currentColor';
+                      }
+                    }
+                    if (node.attributes.stroke) {
+                      const stroke = node.attributes.stroke;
+                      if (stroke && stroke !== 'none' && stroke !== 'inherit') {
+                        node.attributes.stroke = 'currentColor';
+                      }
+                    }
+                  }
+                },
+              },
+            }),
+          },
+        ],
+      },
     }) as any,
   ],
   target: 'es2020',
