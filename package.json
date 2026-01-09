@@ -1,0 +1,44 @@
+{
+  "name": "@2hoch1/pixel-icon-library-react",
+  "version": "0.1.0",
+  "description": "React wrapper components for the HackerNoon Pixel Icon Library.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "generate": "tsx scripts/generate-icons.ts",
+    "build": "npm run generate && tsup",
+    "clean": "rimraf dist",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0 <20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^18.3.12",
+    "esbuild": "^0.25.2",
+    "esbuild-plugin-svgr": "^2.0.0",
+    "react": "^18.3.1",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@hackernoon/pixel-icon-library": "^1.0.6"
+  }
+}
