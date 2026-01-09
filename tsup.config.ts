@@ -9,7 +9,7 @@ export default defineConfig({
     'src/icon-types.ts',
     'src/dynamicIconImports.ts',
     'src/icons/index.ts',
-    'src/icons/*.ts',
+    'src/icons/*.tsx',
   ],
   format: ['esm', 'cjs'],
   // Generate declarations for all entrypoints (including per-icon modules)

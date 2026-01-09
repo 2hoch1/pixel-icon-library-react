@@ -56,9 +56,24 @@ function buildIconFileContent(entry: IconEntry) {
   return [
     header,
     '/// <reference path="../types/upstream-svg.d.ts" />',
+    `import { forwardRef } from 'react';`,
+    `import type { ComponentType, SVGProps } from 'react';`,
     `import SvgComponent from '${entry.importPath}';`,
     '',
-    'export default SvgComponent;',
+    `/**`,
+    ` * @component`,
+    ` * @name ${entry.componentName}`,
+    ` * @description Pixel icon component from @hackernoon/pixel-icon-library`,
+    ` * @param props - SVG element props`,
+    ` * @returns JSX Element`,
+    ` */`,
+    `const ${entry.componentName}: ComponentType<SVGProps<SVGSVGElement>> = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>((props, ref) => {`,
+    `  return <SvgComponent {...props} ref={ref} />;`,
+    `});`,
+    '',
+    `${entry.componentName}.displayName = '${entry.componentName}';`,
+    '',
+    `export default ${entry.componentName};`,
     '',
   ].join('\n');
 }
@@ -165,7 +180,7 @@ async function generate() {
       const entry: IconEntry = { baseName, componentName, variant, importPath };
       entries.push(entry);
 
-      const iconFilePath = path.join(iconsDir, `${baseName}.ts`);
+      const iconFilePath = path.join(iconsDir, `${baseName}.tsx`);
       const iconContent = buildIconFileContent(entry);
       await fs.writeFile(iconFilePath, iconContent, 'utf8');
     }
