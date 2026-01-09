@@ -12,20 +12,16 @@ export default defineConfig({
     'src/icons/*.ts',
   ],
   format: ['esm', 'cjs'],
-  dts: {
-    entry: {
-      index: 'src/index.ts',
-      'icon-types': 'src/icon-types.ts',
-      dynamicIconImports: 'src/dynamicIconImports.ts',
-      'icons/index': 'src/icons/index.ts',
-    },
-  },
+  // Generate declarations for all entrypoints (including per-icon modules)
+  dts: true,
   clean: true,
   sourcemap: true,
   minify: false,
   treeshake: true,
   splitting: false,
   preserveModules: true,
+  // Bundle upstream icons so consumers don't need loaders for .svg/.tsx in node_modules
+  noExternal: ['@hackernoon/pixel-icon-library'],
   esbuildPlugins: [svgrPlugin() as any],
   target: 'es2020',
   outDir: 'dist',

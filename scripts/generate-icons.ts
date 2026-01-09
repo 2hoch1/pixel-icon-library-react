@@ -56,7 +56,7 @@ function buildIconFileContent(entry: IconEntry) {
   return [
     header,
     '/// <reference path="../types/upstream-svg.d.ts" />',
-    `import SvgComponent from '${entry.importPath}?react';`,
+    `import SvgComponent from '${entry.importPath}';`,
     '',
     'export default SvgComponent;',
     '',
@@ -131,7 +131,7 @@ function buildDynamicIconImportsFile(entries: IconEntry[]) {
 
   entries.forEach((entry) => {
     lines.push(
-      `  '${entry.baseName}': () => loadIcon('${entry.importPath}?react'),`
+      `  '${entry.baseName}': () => loadIcon('${entry.importPath}'),`
     );
   });
 
@@ -158,7 +158,8 @@ async function generate() {
     for (const file of files) {
       const baseName = file.replace(/\.svg$/i, '');
       const pascal = toPascalCase(baseName);
-      const componentName = `${pascal}Icon`;
+      // Export component without the "Icon" suffix (e.g., ThumbsupSolid)
+      const componentName = pascal;
       const importPath = `${dependencyName}/icons/SVG/${variant}/${file}`;
 
       const entry: IconEntry = { baseName, componentName, variant, importPath };
