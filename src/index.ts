@@ -1,4 +1,5 @@
 export * from './PixelIcon';
+export * from './DynamicPixelIcon';
 export {
   regularIcons,
   solidIcons,
