@@ -1,6 +1,6 @@
 {
   "name": "@2hoch1/pixel-icon-library-react",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "React wrapper components for the HackerNoon Pixel Icon Library.",
   "license": "MIT",
   "type": "module",
@@ -75,7 +75,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/2hoch1/pixel-icon-library-react.git"
+    "url": "git+https://github.com/2hoch1/pixel-icon-library-react.git"
   },
   "homepage": "https://github.com/2hoch1/pixel-icon-library-react",
   "bugs": {
