@@ -1,0 +1,52 @@
+api changes:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/**
+          - src/*
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - package.json
+          - package-lock.json
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - tests/*
+          - tests/**/*
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/*
+          - .github/**/*
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/*
+          - .github/workflows/**/*
+typings:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.d.ts'
+          - src/**/*.ts
+build:
+  - changed-files:
+      - any-glob-to-any-file:
+          - tsconfig*.json
+          - eslint.config.js
+          - prettier.config.js
+          - .editorconfig
+          - .gitignore
+          - .gitattributes
+          - .commitlintrc.ts
+          - vitest.config.ts
+          - tsup.config.ts
+chore:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .npmignore
+          - LICENSE
+          - .github/CODE_OF_CONDUCT.md

@@ -8,9 +8,7 @@ Icons are pulled directly from `@hackernoon/pixel-icon-library` at build time. T
 
 ```bash
 npm install @2hoch1/pixel-icon-library-react react
-# or
 yarn add @2hoch1/pixel-icon-library-react react
-# or
 pnpm add @2hoch1/pixel-icon-library-react react
 ```
 

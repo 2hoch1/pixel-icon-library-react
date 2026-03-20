@@ -1,0 +1,42 @@
+name: Cleanup caches
+
+on:
+  pull_request:
+    types:
+      - closed
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    name: Cleanup caches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cleanup caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.ref }}
+        run: |
+          gh extension install actions/gh-actions-cache
+
+          echo "Fetching cache keys"
+          cacheKeysForPR=$(gh actions-cache list -R "$REPO" -B "$BRANCH" | cut -f 1)
+
+          if [ -z "$cacheKeysForPR" ]; then
+            echo "No caches to delete"
+            exit 0
+          fi
+
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR; do
+            gh actions-cache delete "$cacheKey" -R "$REPO" -B "$BRANCH" --confirm
+          done
+          echo "Done"

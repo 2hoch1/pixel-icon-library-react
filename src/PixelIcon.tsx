@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import dynamicIconImports from './dynamicIconImports';
 import type { IconName, IconVariant } from './icon-types';
+import { resolveIconName } from './utils/resolveIconName';
 
 export type { IconName, IconVariant } from './icon-types';
 
@@ -13,50 +14,20 @@ export type PixelIconProps = SVGProps<SVGSVGElement> & {
   fallback?: ReactNode;
 };
 
-const defaultSize = 24;
+const DEFAULT_SIZE = 24;
 
 export function PixelIcon({
   name,
   variant,
-  size = defaultSize,
+  size = DEFAULT_SIZE,
   title,
   fallback = null,
   ...rest
 }: PixelIconProps) {
-  const [IconComponent, setIconComponent] = useState<
-    ComponentType<SVGProps<SVGSVGElement> & { title?: string }>
-  >();
+  const [IconComponent, setIconComponent] =
+    useState<ComponentType<SVGProps<SVGSVGElement> & { title?: string }>>();
 
-  const resolvedName = useMemo<IconName | undefined>(() => {
-    const hasBrandsSuffix = name.endsWith('-brands');
-    const hasPurcatsSuffix = name.endsWith('-purcats');
-    const hasSolidSuffix = name.endsWith('-solid');
-    
-    let baseName = name
-      .replace(/-brands$/, '')
-      .replace(/-purcats$/, '')
-      .replace(/-solid$/, '');
-    
-    let targetVariant: IconVariant | undefined;
-    
-    if (variant) {
-      targetVariant = variant;
-    } else if (hasBrandsSuffix) {
-      targetVariant = 'brands';
-    } else if (hasPurcatsSuffix) {
-      targetVariant = 'purcats';
-    } else if (hasSolidSuffix) {
-      targetVariant = 'solid';
-    } else {
-      targetVariant = 'regular';
-    }
-    
-    const candidate = (targetVariant === 'regular' 
-      ? baseName 
-      : `${baseName}-${targetVariant}`) as IconName;
-    
-    return dynamicIconImports[candidate] ? candidate : undefined;
-  }, [name, variant]);
+  const resolvedName = useMemo(() => resolveIconName(name, variant), [name, variant]);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +57,7 @@ export function PixelIcon({
 
   if (!IconComponent) return fallback ?? null;
 
-  const dimension = typeof size === 'number' ? `${size}px` : size ?? `${defaultSize}px`;
+  const dimension = typeof size === 'number' ? `${size}px` : (size ?? `${DEFAULT_SIZE}px`);
 
   return (
     <IconComponent

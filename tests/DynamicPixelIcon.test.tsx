@@ -1,50 +1,96 @@
-import { describe, it, expect } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { DynamicPixelIcon } from '../src/DynamicPixelIcon';
 
-describe('DynamicPixelIcon exports', () => {
-  it('should be a valid React component', () => {
-    expect(DynamicPixelIcon).toBeDefined();
-    expect(typeof DynamicPixelIcon).toBe('function');
-  });
-
-  it('should accept required props', () => {
-    const props = {
-      name: 'heart' as const,
-    };
-    expect(props.name).toBe('heart');
-  });
-
-  it('should accept optional size prop', () => {
-    const props = {
-      name: 'star' as const,
-      size: 48,
-    };
-    expect(props.size).toBe(48);
-  });
-
-  it('should accept variant prop', () => {
-    const props = {
-      name: 'check' as const,
-      variant: 'solid' as const,
-    };
-    expect(props.variant).toBe('solid');
-  });
-
-  it('should handle SVG props passthrough', () => {
-    const props = {
-      name: 'heart' as const,
-      className: 'my-dynamic-icon',
-      strokeWidth: 2,
-      'data-testid': 'dynamic-icon',
-    };
-    expect(props.className).toBe('my-dynamic-icon');
-    expect(props.strokeWidth).toBe(2);
-    expect(props['data-testid']).toBe('dynamic-icon');
-  });
-
-  it('should support fallback prop', () => {
-    const fallback = <div>Loading...</div>;
-    expect(fallback).toBeTruthy();
-  });
+vi.mock('../src/dynamicIconImports', async () => {
+  const React = await import('react');
+  const MockIcon = (props: React.SVGProps<SVGSVGElement> & { title?: string }) =>
+    React.createElement('svg', { 'data-testid': 'mock-icon', ...props });
+  return {
+    default: {
+      heart: () => Promise.resolve({ default: MockIcon }),
+      'star-solid': () => Promise.resolve({ default: MockIcon }),
+    },
+  };
 });
 
+describe('DynamicPixelIcon', () => {
+  it('renders the fallback while loading', () => {
+    render(<DynamicPixelIcon name="heart" fallback={<span>Loading</span>} />);
+    expect(screen.getByText('Loading')).toBeInTheDocument();
+  });
+
+  it('renders the icon after suspense resolves', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" />);
+    });
+    expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
+  });
+
+  it('applies default size of 24px', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" />);
+    });
+    const svg = screen.getByTestId('mock-icon');
+    expect(svg).toHaveAttribute('width', '24px');
+    expect(svg).toHaveAttribute('height', '24px');
+  });
+
+  it('applies custom numeric size', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" size={48} />);
+    });
+    const svg = screen.getByTestId('mock-icon');
+    expect(svg).toHaveAttribute('width', '48px');
+    expect(svg).toHaveAttribute('height', '48px');
+  });
+
+  it('sets role="img" and aria-label from name', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" />);
+    });
+    const svg = screen.getByRole('img');
+    expect(svg).toHaveAttribute('aria-label', 'heart');
+  });
+
+  it('uses title as aria-label when provided', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" title="Favorite" />);
+    });
+    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Favorite');
+  });
+
+  it('resolves variant suffix from icon name', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="star-solid" />);
+    });
+    expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
+  });
+
+  it('renders null for unknown icon name', () => {
+    const { container } = render(<DynamicPixelIcon name={'nonexistent' as never} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders fallback for unknown icon name', () => {
+    render(<DynamicPixelIcon name={'nonexistent' as never} fallback={<span>Not found</span>} />);
+    expect(screen.getByText('Not found')).toBeInTheDocument();
+  });
+
+  it('reuses cached lazy component across renders', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" />);
+    });
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" />);
+    });
+    expect(screen.getAllByTestId('mock-icon')).toHaveLength(2);
+  });
+
+  it('forwards className to the icon', async () => {
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" className="my-icon" />);
+    });
+    expect(screen.getByTestId('mock-icon')).toHaveClass('my-icon');
+  });
+});
