@@ -25,7 +25,7 @@ export function MyComponent() {
   return (
     <div>
       <HeartIcon size={24} />
-      <AlertTriangleSolidIcon size={32} color="red" />
+      <AlertTriangleSolidIcon size={32} className="text-red-500" />
       <AdIcon width={48} height={48} />
     </div>
   );
@@ -50,6 +50,9 @@ export function DynamicExample() {
 
       {/* Or specify variant explicitly */}
       <PixelIcon name="alert-triangle" variant="solid" size={24} />
+
+      {/* Custom fallback while loading */}
+      <PixelIcon name="heart" size={24} fallback={<span>...</span>} />
     </div>
   );
 }
@@ -72,10 +75,6 @@ function Icon({ name, ...props }) {
     </Suspense>
   );
 }
-
-export function LazyLoadedIcon() {
-  return <Icon name="heart" size={24} />;
-}
 ```
 
 <!--prettier-ignore-end-->
@@ -89,7 +88,7 @@ You can browse all available icons on the [Pixel Icon Library][pixel-icon-librar
 
 ## License
 
-This project is licensed under the [MIT License][license].  
+This project is licensed under the [MIT License][license].
 For the icon license, please refer to the original [Pixel Icon Library][pixel-icon-library-repo] repository.
 
 [pixel-icon-library]: https://pixeliconlibrary.com/

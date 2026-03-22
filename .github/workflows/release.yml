@@ -64,6 +64,16 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      - name: Remove orphaned release tags
+        run: |
+          for TAG in $(git tag -l 'v[0-9]*'); do
+            if ! git merge-base --is-ancestor "$TAG" HEAD 2>/dev/null; then
+              echo "Tag $TAG points to a commit not in current branch — removing"
+              git push origin ":refs/tags/$TAG" || true
+              git tag -d "$TAG" || true
+            fi
+          done
+
       - name: Semantic Release
         id: semantic
         uses: cycjimmy/semantic-release-action@v6
