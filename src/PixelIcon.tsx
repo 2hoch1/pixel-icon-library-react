@@ -16,6 +16,19 @@ export type PixelIconProps = SVGProps<SVGSVGElement> & {
 
 const DEFAULT_SIZE = 24;
 
+/**
+ * Resolves and renders a pixel icon by dynamically importing its module at runtime.
+ * Uses `useEffect` + `useState` for broad compatibility without requiring a Suspense boundary.
+ *
+ * Prefer {@link DynamicPixelIcon} when your app already uses Suspense and you want
+ * automatic loading states. Use `PixelIcon` when Suspense is unavailable or undesirable.
+ *
+ * @param props.name - Icon identifier (e.g. `"heart"`, `"alert-triangle-solid"`)
+ * @param props.variant - Optional variant override (`"solid"` | `"regular"` | `"brands"` | `"purcats"`)
+ * @param props.size - Uniform width/height as px number or CSS string. Defaults to 24.
+ * @param props.title - Accessible label rendered as an SVG `<title>` element.
+ * @param props.fallback - React node shown while the icon is loading. Defaults to null.
+ */
 export function PixelIcon({
   name,
   variant,

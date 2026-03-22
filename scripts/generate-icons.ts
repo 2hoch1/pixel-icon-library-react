@@ -74,7 +74,7 @@ function buildIconFileContent(entry: IconEntry) {
     ` * @returns JSX Element`,
     ` */`,
     `const ${entry.componentName}: ComponentType<${entry.componentName}Props> = forwardRef<SVGSVGElement, ${entry.componentName}Props>((`,
-    `  { color = 'currentColor', fill, stroke, size, width, height, ...props },`,
+    `  { fill, stroke, size, width, height, ...props },`,
     `  ref`,
     `) => {`,
     `  const finalFill = fill ?? 'currentColor';`,
@@ -138,9 +138,7 @@ function buildTypesFile(entries: IconEntry[]) {
     `export const regularIconNames = [${regularNames
       .map((name) => `'${name}'`)
       .join(', ')}] as const;`,
-    `export const solidIconNames = [${solidNames
-      .map((name) => `'${name}'`)
-      .join(', ')}] as const;`,
+    `export const solidIconNames = [${solidNames.map((name) => `'${name}'`).join(', ')}] as const;`,
     'export const iconNames = [...brandsIconNames, ...purcatsIconNames, ...regularIconNames, ...solidIconNames] as const;\n',
     'export type BrandsIconName = typeof brandsIconNames[number];',
     'export type PurcatsIconName = typeof purcatsIconNames[number];',
@@ -169,9 +167,7 @@ function buildDynamicIconImportsFile(entries: IconEntry[]) {
   ];
 
   entries.forEach((entry) => {
-    lines.push(
-      `  '${entry.baseName}': () => loadIcon('${entry.importPath}'),`
-    );
+    lines.push(`  '${entry.baseName}': () => loadIcon('${entry.importPath}'),`);
   });
 
   lines.push('} as DynamicIconImportMap;');
