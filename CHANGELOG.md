@@ -1,3 +1,11 @@
+## [1.1.3](https://github.com/2hoch1/pixel-icon-library-react/compare/v1.1.2...v1.1.3) (2026-03-22)
+
+### Bug Fixes
+
+- ci ([1818cff](https://github.com/2hoch1/pixel-icon-library-react/commit/1818cffa45f942573f923cba2346e444eddb64db))
+- **DynamicPixelIcon:** memory leak ([7cf070c](https://github.com/2hoch1/pixel-icon-library-react/commit/7cf070c2c394bce1f8f2af7ec17531573f3ccc30))
+- upgrade npm for OIDC trusted publishing and reduce triple build ([4a79392](https://github.com/2hoch1/pixel-icon-library-react/commit/4a7939266b9fb98895f98ec49b546293fd947de0))
+
 ## [1.1.2](https://github.com/2hoch1/pixel-icon-library-react/compare/v1.1.1...v1.1.2) (2026-03-20)
 
 ### Bug Fixes
