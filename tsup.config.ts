@@ -18,7 +18,10 @@ export default defineConfig({
   sourcemap: true,
   minify: false,
   treeshake: true,
-  splitting: false,
+  // Enable code splitting so the named dynamic imports in dynamicIconImports
+  // resolve to per-icon chunks (lazy-loaded on demand) instead of inlining the
+  // entire icon set into the map. ESM only; CJS cannot split and inlines.
+  splitting: true,
   preserveModules: true,
   // Bundle upstream icons so consumers don't need loaders for .svg/.tsx in node_modules
   noExternal: ['@hackernoon/pixel-icon-library'],
@@ -40,6 +43,7 @@ export default defineConfig({
   ],
   target: 'es2020',
   outDir: 'dist',
+  /** Maps each output format to its JS extension: `.cjs` for CommonJS, `.js` for ESM. */
   outExtension({ format }) {
     return {
       js: format === 'cjs' ? '.cjs' : '.js',

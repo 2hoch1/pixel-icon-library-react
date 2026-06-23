@@ -16,6 +16,8 @@ tests:
 docs:
   - changed-files:
       - any-glob-to-any-file:
+          - docs/*
+          - docs/**/*
           - '**/*.md'
 infra:
   - changed-files:
@@ -38,15 +40,17 @@ build:
           - tsconfig*.json
           - eslint.config.js
           - prettier.config.js
+          - .prettierignore
           - .editorconfig
           - .gitignore
           - .gitattributes
           - .commitlintrc.ts
           - vitest.config.ts
-          - tsup.config.ts
 chore:
   - changed-files:
       - any-glob-to-any-file:
           - .npmignore
           - LICENSE
           - .github/CODE_OF_CONDUCT.md
+          - .github/ISSUE_TEMPLATE/*
+          - .github/ISSUE_TEMPLATE/**/*

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "osvVulnerabilityAlerts": true,
+  "schedule": ["* * 1,15 * *"],
+  "prConcurrentLimit": 6,
+  "labels": ["automation"],
+  "reviewers": ["2hoch1"],
+  "assignAutomerge": true,
+  "minimumReleaseAge": "30 days",
+  "rangeStrategy": "update-lockfile",
+  "branchPrefix": "chore/bump/",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "ignorePaths": ["**/node_modules/**", "**/dist/**"],
+  "packageRules": [
+    {
+      "groupName": "TypeScript",
+      "matchPackageNames": ["typescript"]
+    },
+    {
+      "groupName": "ESLint",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "typescript-eslint",
+        "@typescript-eslint/**",
+        "eslint-plugin-**"
+      ]
+    },
+    {
+      "groupName": "Vitest",
+      "matchPackageNames": ["vitest", "@vitest/**"]
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "additionalBranchPrefix": "deps/",
+      "branchTopic": "{{depNameSanitized}}/{{newVersion}}",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "additionalBranchPrefix": "devDeps/",
+      "branchTopic": "{{depNameSanitized}}/{{newVersion}}",
+      "semanticCommitScope": "devDeps"
+    },
+    {
+      "matchDepTypes": ["peerDependencies"],
+      "additionalBranchPrefix": "peerDeps/",
+      "branchTopic": "{{depNameSanitized}}/{{newVersion}}",
+      "semanticCommitScope": "peerDeps"
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "description": "Owned by the sync-upstream workflow, which regenerates icons and adds a changeset.",
+      "matchPackageNames": ["@hackernoon/pixel-icon-library"],
+      "enabled": false
+    }
+  ]
+}

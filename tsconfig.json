@@ -1,24 +1,27 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noEmit": true,
-    "skipLibCheck": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "exactOptionalPropertyTypes": true,
+    "useDefineForClassFields": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "suppressImplicitAnyIndexErrors": false,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "types": ["react", "node"],
-    "typeRoots": ["./node_modules/@types", "./src"],
-    "baseUrl": "./src",
-    "paths": {
-      "@src/*": ["./*"]
-    }
+    "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src", "scripts", "tsup.config.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src", "tests", "scripts", "tsup.config.ts", "vitest.config.ts", ".commitlintrc.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mark stale issues and PRs
-        uses: actions/stale@v9
+        uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-stale: 35
           days-before-close: 7
           stale-issue-label: 'stale'
           stale-pr-label: 'stale'
-          start-date: '2026-03-20T00:00:00Z'
+          start-date: '2026-03-03T00:00:00Z'
           remove-stale-when-updated: true
           exempt-issue-labels: 'pinned,security,feature request,issued high'
           exempt-pr-labels: 'pinned,security,approved,waiting for testers'

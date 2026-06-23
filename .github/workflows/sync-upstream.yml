@@ -1,0 +1,121 @@
+name: Sync upstream icons
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Check for upstream release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Node.js v24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve versions
+        id: versions
+        run: |
+          current=$(node -p "require('@hackernoon/pixel-icon-library/package.json').version")
+          latest=$(npm view @hackernoon/pixel-icon-library version)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          if [ "$current" != "$latest" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "current=$current latest=$latest changed=($current != $latest)"
+
+      - name: Snapshot current icon names
+        if: steps.versions.outputs.changed == 'true'
+        run: |
+          npm run generate
+          ls src/icons/*.tsx | xargs -n1 basename | sed 's/\.tsx$//' | sort > /tmp/icons-before.txt
+
+      - name: Bump upstream and regenerate
+        if: steps.versions.outputs.changed == 'true'
+        run: |
+          npm install -D "@hackernoon/pixel-icon-library@${{ steps.versions.outputs.latest }}"
+          npm run generate
+
+      - name: Validate (typecheck, test, build)
+        if: steps.versions.outputs.changed == 'true'
+        run: |
+          npm run typecheck
+          npm run test
+          npm run build
+
+      - name: Compute icon diff and bump level
+        if: steps.versions.outputs.changed == 'true'
+        id: diff
+        run: |
+          ls src/icons/*.tsx | xargs -n1 basename | sed 's/\.tsx$//' | sort > /tmp/icons-after.txt
+          added=$(comm -13 /tmp/icons-before.txt /tmp/icons-after.txt | wc -l | tr -d ' ')
+          removed=$(comm -23 /tmp/icons-before.txt /tmp/icons-after.txt | wc -l | tr -d ' ')
+          if [ "$removed" -gt 0 ]; then
+            level=major
+          elif [ "$added" -gt 0 ]; then
+            level=minor
+          else
+            level=patch
+          fi
+          echo "added=$added" >> "$GITHUB_OUTPUT"
+          echo "removed=$removed" >> "$GITHUB_OUTPUT"
+          echo "level=$level" >> "$GITHUB_OUTPUT"
+          echo "added=$added removed=$removed level=$level"
+
+      - name: Write changeset
+        if: steps.versions.outputs.changed == 'true'
+        run: |
+          mkdir -p .changeset
+          {
+            echo "---"
+            echo "'@2hoch1/pixel-icon-library-react': ${{ steps.diff.outputs.level }}"
+            echo "---"
+            echo ""
+            echo "Sync icons with @hackernoon/pixel-icon-library@${{ steps.versions.outputs.latest }} (added: ${{ steps.diff.outputs.added }}, removed: ${{ steps.diff.outputs.removed }})."
+          } > ".changeset/sync-upstream-${{ steps.versions.outputs.latest }}.md"
+
+      - name: Create pull request
+        if: steps.versions.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/sync-upstream
+          base: main
+          add-paths: |
+            package.json
+            package-lock.json
+            .changeset
+          commit-message: 'chore(deps): bump @hackernoon/pixel-icon-library to ${{ steps.versions.outputs.latest }}'
+          title: 'chore(deps): sync icons with @hackernoon/pixel-icon-library@${{ steps.versions.outputs.latest }}'
+          labels: automation
+          body: |
+            Automated upstream sync.
+
+            - **@hackernoon/pixel-icon-library**: `${{ steps.versions.outputs.current }}` -> `${{ steps.versions.outputs.latest }}`
+            - Icons added: **${{ steps.diff.outputs.added }}**
+            - Icons removed: **${{ steps.diff.outputs.removed }}**
+            - Changeset bump: **${{ steps.diff.outputs.level }}**
+
+            Generated icon files are gitignored and regenerated in CI at release time, so this PR only changes `package.json`, the lockfile, and the changeset. The full validation gate (typecheck, tests, build) already ran on these icons in this workflow.
+
+            Review the bump level before merging: removed icons are treated as a major/breaking change.
