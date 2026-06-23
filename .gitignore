@@ -1,4 +1,3 @@
-.claude/
 node_modules/
 dist/
 coverage/
@@ -16,8 +15,10 @@ out/
 *.tgz
 tsconfig.tsbuildinfo
 
+# Local Claude settings
+.claude/
+
 # Auto-generated files by npm run generate
-src/icons/*
-!src/icons/.gitkeep
+src/icons/
 src/icon-types.ts
 src/dynamicIconImports.ts

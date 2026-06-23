@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
-import dynamicIconImports from './dynamicIconImports';
-import type { IconName, IconVariant } from './icon-types';
-import { resolveIconName } from './utils/resolveIconName';
+import dynamicIconImports from '@/dynamicIconImports';
+import type { IconName } from '@/icon-types';
+import { resolveIconName } from '@/utils/resolveIconName';
 
-export type { IconName, IconVariant } from './icon-types';
+export type { IconName } from '@/icon-types';
 
 export type PixelIconProps = SVGProps<SVGSVGElement> & {
   name: IconName;
-  variant?: IconVariant;
   size?: number | string;
   title?: string;
   fallback?: ReactNode;
@@ -23,15 +22,13 @@ const DEFAULT_SIZE = 24;
  * Prefer {@link DynamicPixelIcon} when your app already uses Suspense and you want
  * automatic loading states. Use `PixelIcon` when Suspense is unavailable or undesirable.
  *
- * @param props.name - Icon identifier (e.g. `"heart"`, `"alert-triangle-solid"`)
- * @param props.variant - Optional variant override (`"solid"` | `"regular"` | `"brands"` | `"purcats"`)
+ * @param props.name - Icon identifier (e.g. `"heart"`, `"heart-solid"`)
  * @param props.size - Uniform width/height as px number or CSS string. Defaults to 24.
  * @param props.title - Accessible label rendered as an SVG `<title>` element.
  * @param props.fallback - React node shown while the icon is loading. Defaults to null.
  */
 export function PixelIcon({
   name,
-  variant,
   size = DEFAULT_SIZE,
   title,
   fallback = null,
@@ -40,7 +37,7 @@ export function PixelIcon({
   const [IconComponent, setIconComponent] =
     useState<ComponentType<SVGProps<SVGSVGElement> & { title?: string }>>();
 
-  const resolvedName = useMemo(() => resolveIconName(name, variant), [name, variant]);
+  const resolvedName = useMemo(() => resolveIconName(name), [name]);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +48,7 @@ export function PixelIcon({
 
     const importer = dynamicIconImports[resolvedName];
     importer()
-      .then((mod) => {
+      .then(mod => {
         if (!cancelled) {
           const Component = mod?.default as ComponentType<
             SVGProps<SVGSVGElement> & { title?: string }
@@ -79,7 +76,7 @@ export function PixelIcon({
       focusable={rest.focusable ?? 'false'}
       width={rest.width ?? dimension}
       height={rest.height ?? dimension}
-      title={title}
+      {...(title !== undefined ? { title } : {})}
       {...rest}
     />
   );

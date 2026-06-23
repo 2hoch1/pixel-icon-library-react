@@ -1,22 +1,17 @@
-// Components
-export { PixelIcon } from './PixelIcon';
-export { DynamicPixelIcon } from './DynamicPixelIcon';
+// Public React components
+export { PixelIcon } from '@/PixelIcon';
+export { DynamicPixelIcon } from '@/DynamicPixelIcon';
 
-// Dynamic imports map
-export { default as dynamicIconImports } from './dynamicIconImports';
+// Lazy icon-loader registry (icon name -> dynamic import)
+export { default as dynamicIconImports } from '@/dynamicIconImports';
 
-// Icon types
-export type {
-  IconName,
-  IconVariant,
-  RegularIconName,
-  SolidIconName,
-} from './icon-types';
+// Icon name type
+export type { IconName } from '@/icon-types';
 
-// Individual icon entrypoints
-export * from './icons';
+// Per-icon component entrypoints
+export * from '@/icons';
 
-// Shared type definitions
+// Shared SVG and component type definitions
 export type {
   IconNode,
   IconBaseProps,
@@ -26,4 +21,4 @@ export type {
   IconSvgElement,
   SVGAttributes,
   ElementAttributes,
-} from './types/shared';
+} from '@/types/shared';

@@ -1,8 +1,11 @@
-/** @type {import('prettier').Config} */
+/** @type {import("prettier").Config} */
 export default {
   semi: true,
   singleQuote: true,
-  tabWidth: 2,
-  trailingComma: 'all',
+  trailingComma: 'es5',
   printWidth: 100,
+  tabWidth: 2,
+  useTabs: false,
+  arrowParens: 'avoid',
+  endOfLine: 'lf',
 };

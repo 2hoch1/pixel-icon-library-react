@@ -1,66 +1,108 @@
-# @2hoch1/pixel-icon-library-react
+# `@2hoch1/pixel-icon-library-react`
 
-React components for the [Pixel Icon Library][pixel-icon-library] - a set of pixelated icons that can be easily imported and used as React components.
-
-Icons are pulled directly from `@hackernoon/pixel-icon-library` at build time. This ensures that every release always includes the latest upstream SVGs without requiring manual pre-generation of components.
+React wrapper for the HackerNoon [Pixel Icon Library][pixel-icon-library-repo]. Browse all icons on the [website][pixel-icon-library].
 
 ## Installation
 
 ```bash
 npm install @2hoch1/pixel-icon-library-react react
-yarn add @2hoch1/pixel-icon-library-react react
-pnpm add @2hoch1/pixel-icon-library-react react
 ```
+
+`react` (`>=18 <20`) is a peer dependency.
 
 ## Usage
 
 <!--prettier-ignore-start-->
 
-```tsx
-import {
-  AdIcon, AlertTriangleSolidIcon, HeartIcon,
-} from "@2hoch1/pixel-icon-library-react";
+Three ways to render an icon: tree-shakeable **named imports**, or the **`PixelIcon`** and **`DynamicPixelIcon`** components that resolve a name at runtime.
 
-export function MyComponent() {
+### Named imports
+
+Each export is the PascalCase form of the icon name (e.g. `HeartSolid`), with no `Icon` suffix. They forward every SVG prop and default `fill`/`stroke` to `currentColor`.
+
+```tsx
+import { Heart, HeartSolid, Github } from "@2hoch1/pixel-icon-library-react";
+
+// Size with the `size` prop or raw width/height.
+function Toolbar() {
   return (
-    <div>
-      <HeartIcon size={24} />
-      <AlertTriangleSolidIcon size={32} className="text-red-500" />
-      <AdIcon width={48} height={48} />
-    </div>
+    <>
+      <Heart size={24} />
+      <Github width={48} height={48} />
+    </>
   );
+}
+
+// Tailwind: size-* sets dimensions, text-* sets color via currentColor.
+function Styled() {
+  return <HeartSolid className="size-8 text-red-500" />;
 }
 ```
 
-### Dynamic Icon Component
+A single icon is also reachable by subpath:
 
-`PixelIcon` resolves icons dynamically at runtime from the upstream package. Unknown names or failed imports are safely ignored and render `null`.
+```tsx
+import Heart from "@2hoch1/pixel-icon-library-react/icons/heart";
+```
+
+### `PixelIcon`
+
+Renders an icon by name, no Suspense required. Names are kebab-case; solid icons end in `-solid` (`heart-solid`), others use their plain name (`github`, `business`).
 
 ```tsx
 import { PixelIcon } from "@2hoch1/pixel-icon-library-react";
 
-export function DynamicExample() {
+// Render by name; size with `size` or raw width/height.
+function Toolbar() {
   return (
-    <div>
-      {/* Regular variant (default) */}
+    <>
       <PixelIcon name="heart" size={24} />
-
-      {/* Solid variant - automatically detected from name */}
-      <PixelIcon name="alert-triangle-solid" size={24} />
-
-      {/* Or specify variant explicitly */}
-      <PixelIcon name="alert-triangle" variant="solid" size={24} />
-
-      {/* Custom fallback while loading */}
-      <PixelIcon name="heart" size={24} fallback={<span>...</span>} />
-    </div>
+      <PixelIcon name="exclamation-triangle-solid" size={24} />
+    </>
   );
 }
 ```
 
-### Code Splitting with Dynamic Imports
+Unknown or failed names render the `fallback`, which is also shown while loading:
 
-If you want to lazy load icons yourself, `dynamicIconImports` exposes per-icon importers:
+```tsx
+import { PixelIcon } from "@2hoch1/pixel-icon-library-react";
+
+function WithFallback() {
+  return <PixelIcon name="heart" fallback={<span>...</span>} />;
+}
+```
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `name` | `IconName` | required | Icon name, kebab-case. |
+| `size` | `number \| string` | `24` | Width and height. |
+| `title` | `string` | `undefined` | Sets `aria-label`; falls back to `name`. |
+| `fallback` | `ReactNode` | `null` | Shown while loading and for unknown icons. |
+
+Any standard SVG prop is forwarded as well.
+
+### `DynamicPixelIcon`
+
+Same props as `PixelIcon`, backed by `React.lazy` and `Suspense`. Use it inside a Suspense boundary.
+
+```tsx
+import { DynamicPixelIcon } from "@2hoch1/pixel-icon-library-react";
+
+<DynamicPixelIcon name="star-solid" size={24} fallback={<span>...</span>} />;
+```
+
+On the server, call `clearLazyCache()` between requests:
+
+```tsx
+import { clearLazyCache } from "@2hoch1/pixel-icon-library-react";
+
+clearLazyCache();
+```
+
+### Lazy loading (manually)
+
+`dynamicIconImports` maps each name to a per-icon importer:
 
 ```tsx
 import { Suspense, lazy, useMemo } from "react";
@@ -68,7 +110,6 @@ import dynamicIconImports from "@2hoch1/pixel-icon-library-react/dynamicIconImpo
 
 function Icon({ name, ...props }) {
   const LazyIcon = useMemo(() => lazy(dynamicIconImports[name]), [name]);
-
   return (
     <Suspense fallback={<div style={{ width: 24, height: 24 }} />}>
       <LazyIcon {...props} />
@@ -79,20 +120,25 @@ function Icon({ name, ...props }) {
 
 <!--prettier-ignore-end-->
 
-You can browse all available icons on the [Pixel Icon Library][pixel-icon-library] website.
+## Breaking Changes
+
+### [2.0.0]
+
+Removed the `variant` concept; icons now resolve purely by name. The `variant` prop on `PixelIcon` and `DynamicPixelIcon` is gone, along with the `IconVariant`, `RegularIconName`, and `SolidIconName` type exports. Pass the full icon name instead: solid icons end in `-solid` (`heart-solid`), brand and category icons use their plain name (`github`, `business`).
+
+```diff
+- <PixelIcon name="heart" variant="solid" />
++ <PixelIcon name="heart-solid" />
+```
 
 ## Credits
 
-- **Icons**: Created by [HackerNoon][hackernoon] - see the original [Pixel Icon Library][pixel-icon-library]
-- **React wrapper**: Created by [2hoch1][react-wrapper-repo] - inspired by lucide-react's excellent architecture.
+Icons come from the [Pixel Icon Library][pixel-icon-library-repo]; see that repo for the icon license.
 
 ## License
 
 This project is licensed under the [MIT License][license].
-For the icon license, please refer to the original [Pixel Icon Library][pixel-icon-library-repo] repository.
 
 [pixel-icon-library]: https://pixeliconlibrary.com/
-[hackernoon]: https://hackernoon.com/
 [pixel-icon-library-repo]: https://github.com/hackernoon/pixel-icon-library
-[react-wrapper-repo]: https://github.com/2hoch1/pixel-icon-library-react
 [license]: LICENSE

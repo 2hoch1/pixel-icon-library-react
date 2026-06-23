@@ -1,4 +1,4 @@
-# Issue Labels
+# Issue-type labels
 - name: 'bug'
   color: '#d73a4a'
   description: 'Something is broken'
@@ -6,7 +6,7 @@
   color: '#a2eeef'
   description: 'Request for a new feature'
 
-# Status Labels
+# Workflow-status labels
 - name: 'in progress'
   color: '#fbca04'
   description: 'Work in progress'
@@ -35,7 +35,7 @@
   color: '#7d006a'
   description: 'Needs testing'
 
-# Priority & Help
+# Priority and contribution labels
 - name: 'good first issue'
   color: '#7057ff'
   description: 'Beginner-friendly issue'
@@ -46,7 +46,7 @@
   color: '#00DFA8'
   description: 'Important issue'
 
-# Bug Issues
+# Bug-severity labels
 - name: 'issued low'
   color: '#d4c5f9'
   description: 'Low impact issue'
@@ -57,7 +57,7 @@
   color: '#d4c5f9'
   description: 'High impact issue'
 
-# Resolution
+# Resolution and closure labels
 - name: 'duplicate'
   color: '#cfd3d7'
   description: 'Already reported'
@@ -68,7 +68,7 @@
   color: '#ffffff'
   description: 'Will not be fixed'
 
-# Type of Change
+# Change-type labels (PR classification)
 - name: 'api changes'
   color: '#5319e7'
   description: 'API modifications'
@@ -94,12 +94,12 @@
   color: '#E9314A'
   description: 'Breaks existing behavior'
 
-# Bots & Automation
+# Automation and bot labels
 - name: 'dependabot'
   color: '#0366d6'
   description: 'Dependabot PR'
 
-# Code & Build
+# Code and build-area labels
 - name: 'tests'
   color: '#bfd4f2'
   description: 'Test related'
@@ -128,18 +128,18 @@
   color: '#d4c5f9'
   description: 'Code refactoring'
 
-# Quality & Review
+# Review-quality labels
 - name: 'AI pr'
   color: '#b60205'
-  description: 'AI-assisted PR; review carefully'
+  description: 'AI-assisted PR; Review very carefully!'
 - name: 'bad pr'
-  color: '#b60205'
-  description: 'PR does not meet standards'
-- name: 'released'
-  color: '#0e8a16'
-  description: 'Changes shipped in a release'
+  color: '#B60205'
+  description: 'Below project standards'
 
-# Docs
+# Project-specific labels
 - name: 'docs'
   color: '#0075ca'
   description: 'Documentation changes'
+- name: 'released'
+  color: '#0e8a16'
+  description: 'Released features'
