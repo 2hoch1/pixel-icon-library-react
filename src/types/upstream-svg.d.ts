@@ -1,33 +1,33 @@
-// Type declarations for SVG imports from @hackernoon/pixel-icon-library
-// Note: TypeScript cannot resolve these at compile time, but esbuild will handle them at runtime
+// Ambient module declarations for upstream .svg imports from @hackernoon/pixel-icon-library.
+// tsc cannot resolve these specifiers; esbuild-plugin-svgr substitutes the React component at build time.
 declare module '@hackernoon/pixel-icon-library/icons/SVG/brands/*.svg' {
   import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
-  const Component: ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
+  const Component: ForwardRefExoticComponent<
+    SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>
+  >;
   export default Component;
 }
 
 declare module '@hackernoon/pixel-icon-library/icons/SVG/purcats/*.svg' {
   import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
-  const Component: ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
+  const Component: ForwardRefExoticComponent<
+    SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>
+  >;
   export default Component;
 }
 
 declare module '@hackernoon/pixel-icon-library/icons/SVG/regular/*.svg' {
   import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
-  const Component: ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
+  const Component: ForwardRefExoticComponent<
+    SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>
+  >;
   export default Component;
 }
 
 declare module '@hackernoon/pixel-icon-library/icons/SVG/solid/*.svg' {
   import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
-  const Component: ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
+  const Component: ForwardRefExoticComponent<
+    SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>
+  >;
   export default Component;
-}
-
-declare global {
-  namespace JSX {
-    interface SVGProps<T> {
-      fill?: string | 'currentColor';
-    }
-  }
 }

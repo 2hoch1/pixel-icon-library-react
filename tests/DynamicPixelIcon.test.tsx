@@ -1,8 +1,8 @@
 import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { DynamicPixelIcon } from '../src/DynamicPixelIcon';
+import { DynamicPixelIcon } from '@/DynamicPixelIcon';
 
-vi.mock('../src/dynamicIconImports', async () => {
+vi.mock('@/dynamicIconImports', async () => {
   const React = await import('react');
   const MockIcon = (props: React.SVGProps<SVGSVGElement> & { title?: string }) =>
     React.createElement('svg', { 'data-testid': 'mock-icon', ...props });
@@ -60,7 +60,7 @@ describe('DynamicPixelIcon', () => {
     expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Favorite');
   });
 
-  it('resolves variant suffix from icon name', async () => {
+  it('resolves an icon whose name ends in -solid', async () => {
     await act(async () => {
       render(<DynamicPixelIcon name="star-solid" />);
     });

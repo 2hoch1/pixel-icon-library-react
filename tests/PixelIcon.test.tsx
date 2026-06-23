@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { PixelIcon } from '../src/PixelIcon';
+import { PixelIcon } from '@/PixelIcon';
 
-vi.mock('../src/dynamicIconImports', async () => {
+vi.mock('@/dynamicIconImports', async () => {
   const React = await import('react');
   const MockIcon = ({
     title: _title,
@@ -79,7 +79,7 @@ describe('PixelIcon', () => {
     });
   });
 
-  it('resolves variant suffix from icon name', async () => {
+  it('resolves an icon whose name ends in -solid', async () => {
     render(<PixelIcon name="star-solid" />);
     await waitFor(() => expect(screen.getByTestId('mock-icon')).toBeInTheDocument());
   });

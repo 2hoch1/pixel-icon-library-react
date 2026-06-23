@@ -1,13 +1,8 @@
-import type {
-  SVGProps,
-  ForwardRefExoticComponent,
-  RefAttributes,
-  ComponentType,
-} from 'react';
+import type { SVGProps, ForwardRefExoticComponent, RefAttributes, ComponentType } from 'react';
 
 /**
  * Minimal SVG element names supported by the icon set.
- * Mirrors the React 19 `SVGElementType` addition while staying backward compatible.
+ * Mirrors the React 19 `SVGElementType`
  */
 export type IconSvgElement =
   | 'circle'
@@ -33,6 +28,6 @@ export type IconComponent = ForwardRefExoticComponent<
   Omit<IconBaseProps, 'ref'> & RefAttributes<SVGSVGElement>
 >;
 
-// Legacy/simple component typing used by the generated registry
+// Simple component typing consumed by the generated icon registry
 export type IconProps = SVGProps<SVGSVGElement> & { title?: string };
 export type IconComponentFn = ComponentType<IconProps>;

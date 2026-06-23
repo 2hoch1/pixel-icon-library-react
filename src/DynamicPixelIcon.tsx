@@ -1,8 +1,8 @@
 import { Suspense, lazy, useMemo } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
-import dynamicIconImports from './dynamicIconImports';
-import type { IconName, IconVariant } from './icon-types';
-import { resolveIconName } from './utils/resolveIconName';
+import dynamicIconImports from '@/dynamicIconImports';
+import type { IconName } from '@/icon-types';
+import { resolveIconName } from '@/utils/resolveIconName';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { title?: string }>;
 type LazyIconComponent = ReturnType<typeof lazy<IconComponent>>;
@@ -22,7 +22,6 @@ export function clearLazyCache(): void {
 
 interface DynamicPixelIconProps extends Omit<SVGProps<SVGSVGElement>, 'ref'> {
   name: IconName;
-  variant?: IconVariant;
   size?: number | string;
   title?: string;
   fallback?: ReactNode;
@@ -37,15 +36,13 @@ const DEFAULT_SIZE = 24;
  * Prefer this over {@link PixelIcon} when your app uses Suspense boundaries
  * and you want automatic loading states without `useEffect`.
  *
- * @param props.name - Icon identifier (e.g. `"heart"`, `"alert-triangle-solid"`)
- * @param props.variant - Optional variant override (`"solid"` | `"regular"` | `"brands"` | `"purcats"`)
+ * @param props.name - Icon identifier (e.g. `"heart"`)
  * @param props.size - Uniform width/height as px number or CSS string. Defaults to 24.
  * @param props.title - Accessible label rendered as an SVG `<title>` element.
  * @param props.fallback - React node shown while the icon chunk is loading. Defaults to null.
  */
 export const DynamicPixelIcon = ({
   name,
-  variant,
   size = DEFAULT_SIZE,
   title,
   fallback = null,
@@ -53,7 +50,7 @@ export const DynamicPixelIcon = ({
 }: DynamicPixelIconProps) => {
   const dimension = typeof size === 'number' ? `${size}px` : (size ?? `${DEFAULT_SIZE}px`);
 
-  const resolvedName = useMemo(() => resolveIconName(name, variant), [name, variant]);
+  const resolvedName = useMemo(() => resolveIconName(name), [name]);
 
   const LazyIcon = useMemo(() => {
     if (!resolvedName) return undefined;
@@ -74,7 +71,7 @@ export const DynamicPixelIcon = ({
         aria-label={props['aria-label'] ?? title ?? name}
         role={props.role ?? 'img'}
         focusable={props.focusable ?? 'false'}
-        title={title}
+        {...(title !== undefined ? { title } : {})}
       />
     </Suspense>
   );
