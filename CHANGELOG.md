@@ -1,5 +1,23 @@
 ## [1.1.3](https://github.com/2hoch1/pixel-icon-library-react/compare/v1.1.2...v1.1.3) (2026-03-22)
 
+## 2.0.0
+
+### Major Changes
+
+- 9991cab: Remove the `variant` concept. Icons now resolve purely by name.
+
+  The `variant` prop on `PixelIcon` and `DynamicPixelIcon` is gone, along with the
+  `IconVariant`, `RegularIconName`, and `SolidIconName` type exports. Pass the full
+  icon name instead: solid icons end in `-solid` (`heart-solid`), brand and category
+  icons use their plain name (`github`, `business`).
+
+  Migration:
+
+  ```diff
+  - <PixelIcon name="heart" variant="solid" />
+  + <PixelIcon name="heart-solid" />
+  ```
+
 ### Bug Fixes
 
 - ci ([1818cff](https://github.com/2hoch1/pixel-icon-library-react/commit/1818cffa45f942573f923cba2346e444eddb64db))
