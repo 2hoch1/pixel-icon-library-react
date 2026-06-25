@@ -95,4 +95,21 @@ describe('PixelIcon', () => {
       expect(screen.getByTestId('mock-icon')).toHaveClass('my-icon');
     });
   });
+
+  it('warns when the deprecated variant prop is passed', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<PixelIcon name="heart" variant="solid" />);
+    await waitFor(() => expect(screen.getByTestId('mock-icon')).toBeInTheDocument());
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain('variant');
+    warnSpy.mockRestore();
+  });
+
+  it('does not warn when variant is omitted', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<PixelIcon name="heart" />);
+    await waitFor(() => expect(screen.getByTestId('mock-icon')).toBeInTheDocument());
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 });

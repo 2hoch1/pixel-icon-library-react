@@ -93,4 +93,23 @@ describe('DynamicPixelIcon', () => {
     });
     expect(screen.getByTestId('mock-icon')).toHaveClass('my-icon');
   });
+
+  it('warns when the deprecated variant prop is passed', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" variant="solid" />);
+    });
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain('variant');
+    warnSpy.mockRestore();
+  });
+
+  it('does not warn when variant is omitted', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await act(async () => {
+      render(<DynamicPixelIcon name="heart" />);
+    });
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 });
