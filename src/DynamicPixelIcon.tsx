@@ -1,8 +1,9 @@
-import { Suspense, lazy, useMemo } from 'react';
+import { Suspense, lazy, useEffect, useMemo } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import dynamicIconImports from '@/dynamicIconImports';
 import type { IconName } from '@/icon-types';
 import { resolveIconName } from '@/utils/resolveIconName';
+import { warnOnce } from '@/utils/warnOnce';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { title?: string }>;
 type LazyIconComponent = ReturnType<typeof lazy<IconComponent>>;
@@ -25,9 +26,20 @@ interface DynamicPixelIconProps extends Omit<SVGProps<SVGSVGElement>, 'ref'> {
   size?: number | string;
   title?: string;
   fallback?: ReactNode;
+  /**
+   * @deprecated Removed in v2.0.0 and ignored. Icons now resolve purely by name:
+   * pass the full name instead, e.g. `name="heart-solid"` rather than
+   * `name="heart" variant="solid"`.
+   */
+  variant?: 'regular' | 'solid';
 }
 
 const DEFAULT_SIZE = 24;
+
+const VARIANT_DEPRECATION_MESSAGE =
+  '[pixel-icon-library-react] The `variant` prop was removed in v2.0.0 and is ignored. ' +
+  'Icons resolve by name only: use the full name (solid icons end in `-solid`), ' +
+  'e.g. <DynamicPixelIcon name="heart-solid" /> instead of <DynamicPixelIcon name="heart" variant="solid" />.';
 
 /**
  * Lazy-loads icon components on demand using `React.lazy` and `Suspense` for
@@ -46,11 +58,16 @@ export const DynamicPixelIcon = ({
   size = DEFAULT_SIZE,
   title,
   fallback = null,
+  variant,
   ...props
 }: DynamicPixelIconProps) => {
   const dimension = typeof size === 'number' ? `${size}px` : (size ?? `${DEFAULT_SIZE}px`);
 
   const resolvedName = useMemo(() => resolveIconName(name), [name]);
+
+  useEffect(() => {
+    if (variant !== undefined) warnOnce(VARIANT_DEPRECATION_MESSAGE);
+  }, [variant]);
 
   const LazyIcon = useMemo(() => {
     if (!resolvedName) return undefined;
