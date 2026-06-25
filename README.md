@@ -124,11 +124,14 @@ function Icon({ name, ...props }) {
 
 ### [2.0.0]
 
-Removed the `variant` concept; icons now resolve purely by name. The `variant` prop on `PixelIcon` and `DynamicPixelIcon` is gone, along with the `IconVariant`, `RegularIconName`, and `SolidIconName` type exports. Pass the full icon name instead: solid icons end in `-solid` (`heart-solid`), brand and category icons use their plain name (`github`, `business`).
+Removed the `variant` concept; icons now resolve purely by name, along with the `IconVariant`, `RegularIconName`, and `SolidIconName` type exports. The `variant` prop on `PixelIcon` and `DynamicPixelIcon` is deprecated. Pass the full icon name instead: solid icons end in `-solid` (`heart-solid`), brand and category icons use their plain name (`github`, `business`).
 
 ```diff
 - <PixelIcon name="heart" variant="solid" />
 + <PixelIcon name="heart-solid" />
+
+- <DynamicPixelIcon name="heart" variant="solid" />
++ <DynamicPixelIcon name="heart-solid" />
 ```
 
 ## Credits
