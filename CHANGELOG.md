@@ -1,5 +1,15 @@
 ## [1.1.3](https://github.com/2hoch1/pixel-icon-library-react/compare/v1.1.2...v1.1.3) (2026-03-22)
 
+## 2.0.1
+
+### Patch Changes
+
+- 7b70f5e: Re-introduce the `variant` prop on `PixelIcon` and `DynamicPixelIcon` as deprecated.
+  - `variant` is accepted again on both components and marked `@deprecated` for editor and TypeScript hints. It has no effect at runtime.
+  - Passing `variant` now logs a one-time, dev-only console warning that points to the name-based API (e.g. `name="heart-solid"`).
+  - Added a generic `warnOnce` helper that dedupes warnings and stays silent in production.
+  - Documented the deprecation in the README "Breaking Changes" section, including a `DynamicPixelIcon` migration example.
+
 ## 2.0.0
 
 ### Major Changes
