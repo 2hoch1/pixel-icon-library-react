@@ -3,6 +3,7 @@ import type { ComponentType, ReactNode, SVGProps } from 'react';
 import dynamicIconImports from '@/dynamicIconImports';
 import type { IconName } from '@/icon-types';
 import { resolveIconName } from '@/utils/resolveIconName';
+import { warnOnce } from '@/utils/warnOnce';
 
 export type { IconName } from '@/icon-types';
 
@@ -11,9 +12,20 @@ export type PixelIconProps = SVGProps<SVGSVGElement> & {
   size?: number | string;
   title?: string;
   fallback?: ReactNode;
+  /**
+   * @deprecated Removed in v2.0.0 and ignored. Icons now resolve purely by name:
+   * pass the full name instead, e.g. `name="heart-solid"` rather than
+   * `name="heart" variant="solid"`.
+   */
+  variant?: 'regular' | 'solid';
 };
 
 const DEFAULT_SIZE = 24;
+
+const VARIANT_DEPRECATION_MESSAGE =
+  '[pixel-icon-library-react] The `variant` prop was removed in v2.0.0 and is ignored. ' +
+  'Icons resolve by name only: use the full name (solid icons end in `-solid`), ' +
+  'e.g. <PixelIcon name="heart-solid" /> instead of <PixelIcon name="heart" variant="solid" />.';
 
 /**
  * Resolves and renders a pixel icon by dynamically importing its module at runtime.
@@ -32,12 +44,17 @@ export function PixelIcon({
   size = DEFAULT_SIZE,
   title,
   fallback = null,
+  variant,
   ...rest
 }: PixelIconProps) {
   const [IconComponent, setIconComponent] =
     useState<ComponentType<SVGProps<SVGSVGElement> & { title?: string }>>();
 
   const resolvedName = useMemo(() => resolveIconName(name), [name]);
+
+  useEffect(() => {
+    if (variant !== undefined) warnOnce(VARIANT_DEPRECATION_MESSAGE);
+  }, [variant]);
 
   useEffect(() => {
     let cancelled = false;
